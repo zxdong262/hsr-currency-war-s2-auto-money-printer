@@ -1,0 +1,332 @@
+{
+  "language": "zh",
+  "hotkeys": {
+    "start": "<f6>",
+    "stop": "<f7>",
+    "panic": "<f8>",
+    "toggle": "<f9>"
+  },
+  "display": {
+    "ref_height": 1440,
+    "profiles": [
+      [2560, 1440],
+      [1920, 1080]
+    ],
+    "ask_before_change": true
+  },
+  "templates_dir": "src/pngs",
+  "screenshot_dir": "screenshot",
+  "log_dir": "logs",
+  "monitor": 0,
+  "region": null,
+  "capture": {
+    "backend": "auto",
+    "window": "崩坏：星穹铁道",
+    "monitor_index": 1,
+    "timeout_s": 4.0
+  },
+  "dry_run": false,
+  "debug_images": true,
+  "match": {
+    "threshold": 0.86,
+    "scales": [
+      1.0
+    ],
+    "poll_ms": 350,
+    "wait_timeout_s": 12,
+    "nms_iou": 0.35,
+    "use_roi": true,
+    "sell_fallback_threshold": 0.62
+  },
+  "timing": {
+    "after_click_ms": 500,
+    "after_drag_ms": 800,
+    "after_refresh_ms": 900,
+    "after_menu_ms": 1100,
+    "after_sell_ms": 700,
+    "drag_duration_s": 0.7,
+    "drag_steps": 18,
+    "release_lift_px": 260,
+    "hold_ms": 160,
+    "after_scroll_ms": 350
+  },
+  "behavior": {
+    "close_key_before_task2": "esc",
+    "auto_close_info_key": "esc",
+    "sync_money_with_ocr": true,
+    "market_open": {
+      "styles": [
+        "hold",
+        "away",
+        "into_panel",
+        "click"
+      ],
+      "verify_timeout_s": 2.5,
+      "burst_frames": 4,
+      "panel_point": [
+        1280,
+        110
+      ]
+    },
+    "hotkey_poll_ms": 40,
+    "start": {
+      "activate_window": "崩坏：星穹铁道",
+      "settle_s": 0.8,
+      "switch_delay_s": 3.0,
+      "preflight": true,
+      "preflight_timeout_s": 2.5
+    },
+    "sell_zone": {
+      "enable": true,
+      "bottom_fraction": 0.2,
+      "reject_near_drop_slot_px": 160,
+      "guard_sell_button": true
+    },
+    "buy_scan": {
+      "frames": 3,
+      "gap_ms": 140,
+      "near_miss_margin": 0.06
+    },
+    "task2": {
+      "find_timeout_s": 4.0,
+      "close_timeout_s": 3.0,
+      "scroll_inventory": {
+        "enable": true,
+        "point": [
+          2400,
+          620
+        ],
+        "notches": 3
+      },
+      "slot_timeout_s": 3.0,
+      "drop_verify_s": 1.6,
+      "strip_change_min": 0.004,
+      "sell_timeout_s": 3.5
+    },
+    "max_refused_buys": 2,
+    "bench": {
+      "ref_height": 1440,
+      "x0": 508,
+      "pitch": 166.4,
+      "width": 152,
+      "y0": 1128,
+      "height": 172,
+      "count": 9,
+      "inner_pad": 16,
+      "occupied_mean": 55,
+      "colorful_min": 0.15
+    },
+    "stop_after_idle_refreshes": 0
+  },
+  "economy": {
+    "pack_price": 9,
+    "units_per_pack": 3,
+    "drag_batch_max": 36,
+    "card_sell_price": 5,
+    "refresh_cost": 0,
+    "starting_money": null,
+    "cycles": 0
+  },
+  "limits": {
+    "max_refreshes": 0,
+    "max_buys": 40,
+    "max_drag_attempts": 12,
+    "max_sells": 40
+  },
+  "money": {
+    "anchor_template": "money",
+    "digit_roi": [
+      95,
+      12,
+      81,
+      78
+    ],
+    "threshold": 0.84,
+    "ocr": "auto",
+    "tesseract_cmd": null,
+    "fallback": "ledger",
+    "max_jump": 60,
+    "fallback_roi_rel": [
+      0.8203,
+      0.8194,
+      0.9609,
+      0.8819
+    ],
+    "max_jump_after_sell": 400
+  },
+  "templates": {
+    "market_open": {
+      "file": "click-to-open-market.png",
+      "threshold": 0.86,
+      "anchor": [
+        35,
+        32
+      ],
+      "roi": [
+        200,
+        250,
+        450,
+        450
+      ],
+      "label": {
+        "enable": true,
+        "keywords": [
+          "黑市主理人",
+          "黑市代理人",
+          "黑市"
+        ],
+        "roi": [
+          110,
+          200,
+          600,
+          1080
+        ],
+        "icon_offset": [
+          180,
+          19
+        ],
+        "ref_height": 1440,
+        "min_score": 0.6
+      }
+    },
+    "refresh": {
+      "file": "click-to-refresh.png",
+      "threshold": 0.86,
+      "anchor": [
+        135,
+        28
+      ],
+      "roi": [
+        500,
+        100,
+        2300,
+        800
+      ]
+    },
+    "buy": {
+      "file": "click-to-buy.png",
+      "threshold": 0.85,
+      "anchor": [
+        140,
+        160
+      ],
+      "roi": [
+        500,
+        100,
+        2300,
+        800
+      ],
+      "crop": [
+        60,
+        40,
+        212,
+        180
+      ]
+    },
+    "money": {
+      "file": "money-count.png",
+      "threshold": 0.84,
+      "anchor": [
+        47,
+        48
+      ],
+      "crop": [
+        0,
+        0,
+        95,
+        97
+      ],
+      "roi": [
+        1950,
+        1100,
+        2350,
+        1360
+      ]
+    },
+    "drag_item": {
+      "file": "target-to-drag.png",
+      "threshold": 0.86,
+      "anchor": [
+        51,
+        51
+      ],
+      "crop": [
+        0,
+        0,
+        103,
+        58
+      ],
+      "roi": [
+        1660,
+        30,
+        2560,
+        1310
+      ]
+    },
+    "drop_slot": {
+      "file": "target-to-drop.png",
+      "threshold": 0.8,
+      "anchor": [
+        86,
+        90
+      ],
+      "roi": [
+        500,
+        350,
+        2000,
+        1060
+      ],
+      "crop": [
+        20,
+        40,
+        130,
+        100
+      ],
+      "scales": [
+        0.86,
+        0.88,
+        0.9,
+        0.92,
+        0.94,
+        0.96,
+        0.98,
+        1.0
+      ]
+    },
+    "dup_card": {
+      "file": "click-to-open-sell-menu.png",
+      "threshold": 0.86,
+      "anchor": [
+        72,
+        86
+      ],
+      "roi": [
+        150,
+        1050,
+        1200,
+        1440
+      ]
+    },
+    "sell": {
+      "file": "sell-button.png",
+      "threshold": 0.82,
+      "anchor": [
+        225,
+        37
+      ],
+      "roi": [
+        1500,
+        900,
+        2800,
+        1400
+      ],
+      "crop": [
+        170,
+        8,
+        130,
+        58
+      ]
+    }
+  },
+  "debug_keep_files": 400
+}

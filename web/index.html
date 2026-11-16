@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auto Money Printer · Test Console</title>
+<style>
+  :root{
+    --bg:#fafafa; --panel:#fff; --line:#e3e3e3; --ink:#1c1c1c; --muted:#767676;
+    --accent:#1a1a1a; --ok:#177245; --warn:#a35b00; --err:#b3261e; --blue:#1b5e9e;
+    --mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+         padding:18px 24px 14px;border-bottom:1px solid var(--line);background:var(--panel)}
+  h1{font-size:17px;font-weight:600;margin:0;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:12px}
+  .spacer{flex:1}
+  .pill{font:12px var(--mono);border:1px solid var(--line);border-radius:2px;padding:3px 8px}
+  .pill.on{color:var(--ok);border-color:#bcd8c6}
+  .pill.off{color:var(--muted)}
+  main{padding:20px 24px 60px;max-width:1500px;margin:0 auto}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+          padding:14px 16px;margin-bottom:14px}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);
+     margin:0 0 12px;font-weight:600}
+  h3{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);
+     margin:0 0 6px;font-weight:600}
+  input[type=text]{font:13px var(--mono);border:1px solid var(--line);border-radius:2px;
+     padding:6px 8px;background:#fff;color:var(--ink);width:96px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+  @media(max-width:1000px){.grid{grid-template-columns:1fr}}
+  button{font:13px inherit;background:var(--panel);color:var(--ink);border:1px solid #c9c9c9;
+         border-radius:2px;padding:7px 13px;cursor:pointer}
+  button:hover{background:#f0f0f0}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  button.primary:hover{background:#333}
+  button.danger{color:var(--err);border-color:#e5b8b5}
+  input[type=number],select,textarea{font:13px var(--mono);border:1px solid var(--line);
+         border-radius:2px;padding:6px 8px;background:#fff;color:var(--ink)}
+  input[type=number]{width:72px}
+  label{font-size:12px;color:var(--muted)}
+  .metrics{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;
+           border-top:1px solid var(--line);padding-top:12px}
+  .metric{min-width:76px}
+  .metric b{display:block;font:19px var(--mono);font-weight:600;line-height:1.25}
+  .metric span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  #phase{font:13px var(--mono);color:var(--blue)}
+  .shot{width:100%;border:1px solid var(--line);background:#f4f4f4;display:block;min-height:80px}
+  .list{font:12px/1.75 var(--mono);margin-top:10px;white-space:pre-wrap;word-break:break-all}
+  .hit{color:var(--ok)} .miss{color:var(--muted)}
+  .tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;margin-top:10px}
+  .tpl{border:1px solid var(--line);padding:6px;text-align:center;font:11px var(--mono)}
+  .tpl img{max-width:100%;height:56px;object-fit:contain;display:block;margin:0 auto 5px}
+  .tpl .s{color:var(--muted)}
+  #cfg{width:100%;height:230px;resize:vertical}
+  .logbox{height:300px;overflow:auto;border:1px solid var(--line);background:#fcfcfc;
+          padding:8px 10px;font:12px/1.6 var(--mono)}
+  .log{display:flex;gap:9px;border-bottom:1px solid #f2f2f2;padding:1px 0}
+  .log .t{color:#999;flex:none} .log .l{flex:none;width:52px}
+  .log .m{white-space:pre-wrap;word-break:break-all}
+  .DEBUG .m{color:#888} .INFO .m{color:var(--ink)} .WARNING .m{color:var(--warn)}
+  .ERROR .m{color:var(--err)} .CRITICAL .m{color:var(--err);font-weight:600}
+  .log .d{color:#8a8a8a;font-size:11px}
+  .note{font-size:12px;color:var(--muted);margin-top:8px}
+  .inline{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .err{color:var(--err);font:12px var(--mono);margin-top:8px;min-height:16px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Auto Money Printer</h1>
+  <span class="sub">image-recognition task runner · test console</span>
+  <span class="spacer"></span>
+  <span class="pill off" id="conn">connecting…</span>
+  <span class="sub" id="hk"></span>
+</header>
+
+<main>
+  <section>
+    <h2>Controls</h2>
+    <div class="row">
+      <button class="primary" id="dry">Start · dry run</button>
+      <button id="real">Start · real input</button>
+      <button id="stop" disabled>Stop</button>
+      <button class="danger" id="panic" disabled>Panic stop</button>
+      <button id="focusGame">Focus game</button>
+      <label>cycles <input type="number" id="cycles" min="0" max="999" value="0" title="0 = keep cycling until F7"></label>
+      <label><input type="checkbox" id="cfgDry"> dry_run in config</label>
+      <span class="sub">phase: <span id="phase">idle</span></span>
+    </div>
+    <div class="note" id="winInfo"></div>
+    <div class="metrics">
+      <div class="metric"><b id="mMoney">–</b><span>money</span></div>
+      <div class="metric"><b id="mBuys">0</b><span>packs bought</span></div>
+      <div class="metric"><b id="mRef">0</b><span>refreshes</span></div>
+      <div class="metric"><b id="mUnits">0</b><span>projectors</span></div>
+      <div class="metric"><b id="mDrag">0</b><span>duplicates</span></div>
+      <div class="metric"><b id="mSold">0</b><span>cards sold</span></div>
+      <div class="metric"><b id="mProfit">0</b><span>net</span></div>
+      <div class="metric"><b id="mElapsed">0.0</b><span>seconds</span></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label>Override money <input type="number" id="moneyVal" placeholder="83"></label>
+      <button id="setMoney">Set</button>
+      <span class="sub" id="moneySrc"></span>
+    </div>
+    <div class="err" id="runErr"></div>
+  </section>
+
+  <section id="settings">
+    <h2>Settings · shortcuts / display / values</h2>
+    <div class="grid">
+      <div>
+        <h3>Global shortcuts</h3>
+        <div class="row" style="margin-top:6px">
+          <label>start <input type="text" id="hkStart" spellcheck="false" placeholder="&lt;f6&gt;"></label>
+          <label>stop <input type="text" id="hkStop" spellcheck="false" placeholder="&lt;f7&gt;"></label>
+          <label>panic <input type="text" id="hkPanic" spellcheck="false" placeholder="&lt;f8&gt;"></label>
+          <label>toggle <input type="text" id="hkToggle" spellcheck="false" placeholder="&lt;f9&gt;"></label>
+        </div>
+        <div class="note">Format <code>&lt;f6&gt;</code> or <code>&lt;ctrl&gt;+&lt;alt&gt;+s</code>.
+          Saved instantly, no restart needed.</div>
+      </div>
+      <div>
+        <h3>Display</h3>
+        <div class="sub" id="dispInfo">detecting…</div>
+        <div class="row" style="margin-top:6px" id="resButtons"></div>
+        <div class="note">Templates auto-scale from the 1440px reference. Switching the screen
+          asks for confirmation first; the game may need a moment to resize.</div>
+      </div>
+    </div>
+    <h3 style="margin-top:14px">Economy &amp; guards</h3>
+    <div class="row" style="margin-top:6px">
+      <label>pack price <input type="number" id="vPack" min="1" style="width:66px"></label>
+      <label>sell price <input type="number" id="vSell" min="1" style="width:66px"></label>
+      <label>refresh cost <input type="number" id="vRefresh" min="0" style="width:66px"></label>
+      <label>batch drags <input type="number" id="vBatch" min="1" max="99" style="width:66px"></label>
+      <label>max buys <input type="number" id="vBuys" min="0" style="width:66px"></label>
+      <label>max sells <input type="number" id="vSells" min="0" style="width:66px"></label>
+      <label>max refreshes <input type="number" id="vRefs" min="0" style="width:78px" title="0 = unlimited"></label>
+      <label>bottom sell zone <input type="number" id="vZone" min="0.05" max="0.95" step="0.01" style="width:66px"></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="primary" id="saveSettings">Save settings</button>
+      <button id="resetSettings">Reset from config.json</button>
+      <span class="sub" id="setMsg"></span>
+    </div>
+    <div class="err" id="setErr"></div>
+  </section>
+
+  <div class="grid">
+    <section>
+      <h2>Vision probe · find templates on a screen</h2>
+      <div class="row">
+        <select id="source"><option value="live">live screen</option></select>
+        <label>threshold <input type="number" id="th" min="0" max="1" step="0.01" placeholder="auto" style="width:80px"></label>
+        <button id="probeBtn" class="primary">Probe</button>
+        <button id="probeLive">Probe live</button>
+      </div>
+      <img class="shot" id="shot" alt="annotated screen">
+      <div class="list" id="matches">Run a probe to see detections.</div>
+      <div class="note" id="zoneInfo"></div>
+      <div class="note">Boxes = matched templates, crosshair = click point. Red line = top of the
+        bottom sell zone; duplicated cards above it are never clicked or sold. Use an offline
+        screenshot to verify thresholds without touching the game.</div>
+    </section>
+
+    <section>
+      <h2>Money OCR &amp; templates</h2>
+      <div class="row">
+        <span class="sub">read value:</span> <b id="ocrVal" style="font:16px var(--mono)">–</b>
+        <span class="sub" id="ocrMeta"></span>
+      </div>
+      <img id="ocrCrop" class="shot" style="width:220px;height:70px;object-fit:contain;margin-top:10px" alt="digit crop">
+      <div class="tpls" id="tpls"></div>
+    </section>
+  </div>
+
+  <section>
+    <h2>Config · config.json</h2>
+    <textarea id="cfg" spellcheck="false"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button id="saveCfg" class="primary">Save &amp; reload</button>
+      <button id="reloadCfg">Reload</button>
+      <label><input type="checkbox" id="useRoi"> use search ROIs</label>
+      <label><input type="checkbox" id="dbg"> save debug screenshots</label>
+      <button onclick="location.href='/api/logfile'">Download log</button>
+    </div>
+    <div class="err" id="cfgErr"></div>
+    <div class="note">
+      Hotkeys, thresholds, per-template ROIs, prices, delays and limits all live here.
+      ROIs are tuned for a 4480×1440 desktop with the game window on the left — clear them
+      (set to <code>null</code>) or untick "use search ROIs" if your layout differs.
+    </div>
+  </section>
+
+  <section>
+    <h2>Live log</h2>
+    <div class="inline">
+      <label><input type="checkbox" id="autoScroll" checked> auto-scroll</label>
+      <label><input type="checkbox" id="verbose"> include DEBUG</label>
+      <button id="clearLog">Clear view</button>
+      <span class="sub" id="logCount"></span>
+    </div>
+    <div class="logbox" id="logbox"></div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let lastId = 0, logLines = 0;
+const api = async (url, opts) => {
+  const r = await fetch(url, opts);
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+  return d;
+};
+const post = (url, body) => api(url, {method:'POST', headers:{'Content-Type':'application/json'},
+                                      body: JSON.stringify(body || {})});
+
+/* ---------------- status + logs ---------------- */
+async function tick(){
+  try{
+    const s = await api('/api/status');
+    $('conn').textContent = s.running ? (s.dry_run ? 'RUNNING · dry' : 'RUNNING · REAL') : 'idle';
+    $('conn').className = 'pill ' + (s.running ? 'on' : 'off');
+    const backend = (s.hotkey_backends||[]).join('+') || 'off';
+    $('hk').textContent = Object.entries(s.hotkeys||{}).map(([k,v])=>k+' '+v).join(' · ')
+      + '   [' + backend + ']';
+    const g = s.game_window;
+    $('winInfo').textContent = (g
+      ? `game window: ${g.title} @ ${g.rect.join(',')}` +
+        (g.minimized ? ' · minimized' : (s.foreground === g.title ? ' · focused' : ' · in background'))
+      : 'game window not found — set behavior.start.activate_window in config')
+      + ` · capture ${s.capture || '?'} · app ${s.elevated ? 'admin' : 'not admin'}`
+      + (s.game_elevated ? ` · game ${s.game_elevated ? 'admin' : 'user'}` : '');
+    $('phase').textContent = s.phase + (s.message ? ' · ' + s.message : '');
+    $('mMoney').textContent = s.money ?? '–';
+    $('mBuys').textContent = s.buys; $('mRef').textContent = s.refreshes;
+    $('mUnits').textContent = s.units; $('mDrag').textContent = s.drags;
+    $('mSold').textContent = s.sold; $('mProfit').textContent = s.profit;
+    $('mElapsed').textContent = (s.elapsed_s||0).toFixed(1);
+    $('moneySrc').textContent = 'source: ' + s.money_source + (s.last_error ? '  ⚠ ' + s.last_error : '');
+    $('runErr').textContent = s.warning ? '⚠ ' + s.warning : (s.last_error || '');
+    $('dry').disabled = s.running; $('real').disabled = s.running;
+    $('stop').disabled = !s.running; $('panic').disabled = !s.running;
+  }catch(e){ $('conn').textContent = 'offline'; $('conn').className='pill off'; }
+  try{
+    const l = await api('/api/logs?since=' + lastId);
+    lastId = l.last_id;
+    const box = $('logbox');
+    for(const it of l.items){
+      if(it.level === 'DEBUG' && !$('verbose').checked) continue;
+      const row = document.createElement('div');
+      row.className = 'log ' + it.level;
+      const data = Object.keys(it.data||{}).length ? JSON.stringify(it.data) : '';
+      row.innerHTML = '<span class="t">'+it.ts+'</span><span class="l">'+it.level+'</span>'+
+                      '<span class="m">'+esc(it.msg)+(data?' <span class="d">'+esc(data)+'</span>':'')+'</span>';
+      box.appendChild(row); logLines++;
+    }
+    while(box.childElementCount > 1200) box.removeChild(box.firstChild);
+    $('logCount').textContent = logLines + ' lines';
+    if($('autoScroll').checked) box.scrollTop = box.scrollHeight;
+  }catch(e){}
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+/* ---------------- controls ---------------- */
+$('dry').onclick  = () => post('/api/start',{dry_run:true,  cycles:+$('cycles').value});
+$('real').onclick = () => post('/api/start',{dry_run:false, cycles:+$('cycles').value});
+$('stop').onclick = () => post('/api/stop');
+$('panic').onclick= () => post('/api/panic');
+$('focusGame').onclick = async () => {
+  try{
+    const d = await post('/api/activate');
+    $('winInfo').textContent = d.ok
+      ? `game focused: ${d.title} @ ${(d.rect||[]).join(',')}`
+      : `focus failed: ${d.result || d.error}`;
+  }catch(e){ $('winInfo').textContent = 'focus failed: ' + e.message; }
+  tick();
+};
+$('setMoney').onclick = async () => {
+  const v = parseInt($('moneyVal').value,10);
+  if(Number.isNaN(v)) return;
+  await post('/api/money',{value:v}); tick();
+};
+$('clearLog').onclick = () => { $('logbox').innerHTML=''; logLines=0; };
+
+/* ---------------- probe ---------------- */
+async function loadSources(){
+  const d = await api('/api/screenshots');
+  const sel = $('source');
+  d.files.forEach(f => { const o=document.createElement('option'); o.value=f; o.textContent=f; sel.appendChild(o); });
+  const t = await api('/api/templates');
+  $('tpls').innerHTML = Object.entries(t).map(([n,v]) =>
+    `<div class="tpl" id="tpl-${n}"><img src="${v.thumb}" alt="${n}"><div>${n}</div>`+
+    `<div class="s" id="score-${n}">–</div></div>`).join('');
+}
+async function probe(src){
+  const th = $('th').value.trim();
+  const url = '/api/probe?source=' + encodeURIComponent(src) + (th ? '&threshold='+th : '');
+  $('matches').textContent = 'scanning…';
+  try{
+    const d = await api(url);
+    $('shot').src = d.image;
+    $('matches').innerHTML = Object.entries(d.scores).map(([n,s])=>{
+      const hit = d.matches.some(m=>m.name===n);
+      const m = d.matches.find(x=>x.name===n);
+      return `<span class="${hit?'hit':'miss'}">${hit?'●':'○'} ${n.padEnd(14)} ${s.toFixed(3)}`+
+             (m?`  @(${m.x},${m.y})`:'')+`</span>`;
+    }).join('\n');
+    const z = d.sell_zone;
+    const cards = d.cards || [];
+    const inZone = cards.filter(c=>c.in_zone).length;
+    const outZone = cards.length - inZone;
+    $('zoneInfo').textContent = z
+      ? `sell zone: y >= ${z.min_y} (bottom ${Math.round(z.bottom_fraction*100)}%), `+
+        (z.enabled ? 'guard ON' : 'guard OFF') +
+        ` · duplicated cards: ${inZone} in zone, ${outZone} rejected` +
+        (outZone ? '  ⚠ middle-screen match will not be sold' : '')
+      : '';
+    $('ocrVal').textContent = d.money.value ?? '–';
+    $('ocrMeta').textContent = d.money.backend + (d.money.raw ? '  raw="'+d.money.raw+'"' : '');
+    $('ocrCrop').src = d.money.crop ||
+      'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    Object.keys(d.scores).forEach(n=>{
+      const el = $('score-'+n); if(el) el.textContent = d.scores[n].toFixed(3);
+    });
+  }catch(e){ $('matches').textContent = 'probe failed: ' + e.message; }
+}
+$('probeBtn').onclick = () => probe($('source').value);
+$('probeLive').onclick = () => probe('live');
+
+/* ---------------- settings ---------------- */
+const hkFields = {start:'hkStart', stop:'hkStop', panic:'hkPanic', toggle:'hkToggle'};
+function fillSettings(c){
+  for(const [k,id] of Object.entries(hkFields)) $(id).value = (c.hotkeys||{})[k] || '';
+  const e=c.economy||{}, l=c.limits||{}, bh=c.behavior||{};
+  $('vPack').value=e.pack_price; $('vSell').value=e.card_sell_price;
+  $('vRefresh').value=e.refresh_cost; $('vBatch').value=e.drag_batch_max;
+  $('vBuys').value=l.max_buys; $('vSells').value=l.max_sells; $('vRefs').value=l.max_refreshes;
+  $('vZone').value=(bh.sell_zone||{}).bottom_fraction;
+}
+async function saveSettings(){
+  const num = id => { const v=parseFloat($(id).value); return Number.isFinite(v)?v:0; };
+  const patch = {
+    hotkeys: Object.fromEntries(Object.entries(hkFields).map(([k,id])=>[k,$(id).value.trim()])),
+    economy: {pack_price:num('vPack'), card_sell_price:num('vSell'),
+              refresh_cost:num('vRefresh'), drag_batch_max:Math.round(num('vBatch')),
+              cycles:+$('cycles').value},
+    limits: {max_buys:Math.round(num('vBuys')), max_sells:Math.round(num('vSells')),
+             max_refreshes:Math.round(num('vRefs'))},
+    behavior: {sell_zone:{bottom_fraction:num('vZone')}}
+  };
+  try{
+    await api('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},
+                             body:JSON.stringify(patch)});
+    $('setMsg').textContent='saved'; $('setErr').textContent='';
+    await loadConfig();
+  }catch(e){ $('setErr').textContent='Save failed: '+e.message; $('setMsg').textContent=''; }
+}
+$('saveSettings').onclick=saveSettings;
+$('resetSettings').onclick=()=>loadConfig().then(()=>{ $('setMsg').textContent='reloaded from config.json'; });
+async function switchDisplay(w,h){
+  const d=await api('/api/display').catch(()=>({current:['?','?']}));
+  if(!confirm(`Switch screen from ${d.current.join('×')} to ${w}×${h}?\n\nThe game may need a moment to resize.`)) return;
+  try{
+    const r=await post('/api/display',{width:w,height:h,confirmed:true});
+    $('setMsg').textContent=r.message; $('setErr').textContent='';
+    await loadDisplay();
+  }catch(e){ $('setErr').textContent='Switch failed: '+e.message; }
+}
+async function loadDisplay(){
+  try{
+    const d=await api('/api/display');
+    $('dispInfo').textContent=`screen ${d.current.join('×')} · profile ${(d.active_profile||[]).join('×')||'?'} · scale ${d.scale}`+
+      (d.supported?' ✓':' ⚠ unsupported');
+    $('resButtons').innerHTML=(d.profiles||[]).map(p=>
+      `<button class="resBtn" data-w="${p[0]}" data-h="${p[1]}">${p[0]} × ${p[1]}</button>`).join('');
+    document.querySelectorAll('.resBtn').forEach(b=>{
+      b.onclick=()=>switchDisplay(+b.dataset.w,+b.dataset.h);
+    });
+  }catch(e){ $('dispInfo').textContent='display probe failed: '+e.message; }
+}
+
+/* ---------------- config ---------------- */
+async function loadConfig(){
+  const c = await api('/api/config');
+  $('cfg').value = JSON.stringify(c,null,2);
+  $('cfgDry').checked = !!c.dry_run; $('useRoi').checked = !!c.match.use_roi;
+  $('dbg').checked = !!c.debug_images; $('cycles').value = c.economy.cycles ?? 0;
+  fillSettings(c); loadDisplay();
+}
+async function saveConfig(){
+  try{
+    const data = JSON.parse($('cfg').value);
+    await api('/api/config',{method:'PUT',headers:{'Content-Type':'application/json'},
+                             body:JSON.stringify(data)});
+    $('cfgErr').textContent = ''; await loadConfig();
+  }catch(e){ $('cfgErr').textContent = 'Save failed: ' + e.message; }
+}
+$('saveCfg').onclick = saveConfig;
+$('reloadCfg').onclick = loadConfig;
+$('cfgDry').onchange = async e => { await post('/api/config',{dry_run:e.target.checked}); loadConfig(); };
+$('useRoi').onchange = async e => { await post('/api/config',{match:{use_roi:e.target.checked}}); loadConfig(); };
+$('dbg').onchange = async e => { await post('/api/config',{debug_images:e.target.checked}); loadConfig(); };
+
+loadSources().catch(e=>console.error(e));
+loadConfig().catch(e=>console.error(e));
+setInterval(tick, 500);
+tick();
+</script>
+</body>
+</html>

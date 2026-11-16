@@ -1,0 +1,28 @@
+# --- Python -------------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# --- build output (the exe is published on the Releases page, not in the repo) --
+build/
+dist/
+*.spec.bak
+
+# --- runtime artefacts ---------------------------------------------------------
+logs/
+screenshot/
+*.log
+debug/
+
+# --- local / editor / agent tooling -------------------------------------------
+.workbuddy/
+.workbuddy-ai/
+.tmp_analysis/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
